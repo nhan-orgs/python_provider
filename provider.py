@@ -30,16 +30,6 @@ def new_request(data):
             "result": f"cmd {data['cmd']} is not supported"
         })
 
-@sio.event
-def disconnect():
-    print('disconnected from server')
-
-
-@sio.event
-def hello(a):
-    print("Receive message from server")
-
-
 if __name__ == '__main__':
     sio.connect('http://localhost:3091')
     sio.wait()
