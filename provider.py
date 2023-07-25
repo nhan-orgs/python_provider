@@ -2,12 +2,6 @@ import socketio
 sio = socketio.Client()
 provider_id = "PYTHON-CLIENT-SAMPLE"
 
-import cv2
-import mediapipe as mp
-import numpy as np
-import time
-from collections import deque
-
 def detect_function(data):
     print("detect_function")
     return "result"
