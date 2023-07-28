@@ -2,9 +2,11 @@ import socketio
 sio = socketio.Client()
 provider_id = "PYTHON-CLIENT-SAMPLE"
 
-def detect_function(data):
-    print("detect_function")
-    return "result"
+def double_me_handle(input):
+    return input*2
+
+def math_add_handle(input):
+    return input["x"]+input["y"]
 
 
 @sio.event
@@ -18,18 +20,25 @@ def connect():
 @sio.event
 def new_request(data):
     print('new_request')
-    if data["cmd"] == "detect-face":
-        result = detect_function(data["data"])
+    if data["cmd"] == "double_me":
+        result = double_me_handle(data["data"])
         sio.emit("provider_reply", {
             **data,
             "result": result
         })
-    else:
+        return
+    if data["cmd"] == "math_add":
+        result = double_me_handle(data["data"])
         sio.emit("provider_reply", {
+            **data,
+            "result": result
+        })
+        return
+    sio.emit("provider_reply", {
             **data,
             "result": f"cmd {data['cmd']} is not supported"
         })
 
 if __name__ == '__main__':
-    sio.connect('http://localhost:3091')
+    sio.connect('https://bridge.digitalauto.tech')
     sio.wait()
