@@ -1,9 +1,9 @@
 import socketio
 import asyncio
-sio = socketio.Client()
+sio = socketio.AsyncClient()
 provider_id = "PYTHON-CLIENT-SAMPLE"
 
-def double_me_handle(input):
+async def double_me_handle(input):
     return input*2
 
 async def simulate_run():
@@ -11,42 +11,47 @@ async def simulate_run():
     for i in range(0, 10):
         await asyncio.sleep(1)
         print(f"i: {i}")
-        sio.emit("sent_to_my_clients", {
+        await sio.emit("sent_to_my_clients", {
             "provider_id": "PYTHON-CLIENT-SAMPLE",
             "cmd": "showSpeed",
             "data": i
         });
 
 @sio.event
-def connect():
+async def connect():
+    global sio
     print('connected to server')
-    sio.emit("register_provider", {
+    await sio.emit("register_provider", {
         "provider_id": provider_id,
-        "name": "Sample provider"
+        "name": "Sample provider async"
     });
 
 @sio.event
-def new_request(data):
+async def new_request(data):
+    global sio
     print('new_request')
     if data["cmd"] == "double_me":
-        result = double_me_handle(data["data"])
-        sio.emit("provider_reply", {
+        result = await double_me_handle(data["data"])
+        await sio.emit("provider_reply", {
             **data,
             "result": result
         })
         return
     if data["cmd"] == "Start":
-        sio.emit("provider_reply", {
+        await sio.emit("provider_reply", {
             **data,
             "result": "Staring..."
         })
-        asyncio.run(simulate_run())
+        await simulate_run()
         return
-    sio.emit("provider_reply", {
+    await sio.emit("provider_reply", {
             **data,
             "result": f"cmd {data['cmd']} is not supported"
         })
 
-if __name__ == '__main__':
-    sio.connect('https://bridge.digitalauto.tech')
-    sio.wait()
+async def connect_to_server():
+    global sio
+    await sio.connect('https://bridge.digitalauto.tech')
+    await sio.wait()
+
+asyncio.run(connect_to_server())
